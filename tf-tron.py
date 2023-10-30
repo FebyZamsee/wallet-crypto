@@ -71,4 +71,5 @@ def main(file="wallet.txt"):
 
 if __name__ == '__main__':
 	sendto = input(' [ ? ] Send to Wallet > ')
-	main()
+	filename = input(' [ ? ] Saved File Name > ')
+	main(filename)
