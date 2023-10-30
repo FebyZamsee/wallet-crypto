@@ -56,7 +56,7 @@ def create(jumlah:int,submain=None):
 		if submain is not None:
 			pk = kecc256(submain+pk)
 		wl=wallet(pk)
-		save(pk,wl,'subwalet.txt')
+		save(pk,wl)
 	fn = time.time()
 	print(f"Complete in: {fn-st:.2f}")
 
