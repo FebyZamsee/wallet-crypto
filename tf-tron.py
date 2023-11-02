@@ -5,6 +5,7 @@ import base58
 import ecdsa
 from Crypto.Hash import keccak
 import requests as r
+import random
 
 url = 'https://api.trongrid.io'
 def keccak256(data):
@@ -19,14 +20,25 @@ def verifying_key_sendto(key):
 	addr = base58.b58encode_check(primitive_addr)
 	return addr
 
+def proci():
+	with open("proxy.txt") as file:
+		proxies = file.read().strip().splitlines()
+	return random.choice(proxies)
+
 def ceksaldo(wallet):
-	result = r.get(f"https://apilist.tronscanapi.com/api/accountv2?address={wallet}")
+	pro = proci()
+	prox = {
+		"http":pro,
+		"https":pro
+	}
+	result = r.get(f"https://apilist.tronscanapi.com/api/accountv2?address={wallet}",proxies=prox)
 	saldo = result.json()["withPriceTokens"][0]["amount"]
-	saldo = float(saldo)
+	# saldo = float(saldo)
 	return saldo
 
 
 def main(file="wallet.txt"):
+	sendTotal = 0
 	for  wlPK in open(file,'r').read().strip().splitlines():
 		resText = ''
 		privKey = wlPK.split(' ')[1]
@@ -37,10 +49,9 @@ def main(file="wallet.txt"):
 		addr = base58.b58encode_check(primitive_addr)
 		resText += f" [{addr.decode()}]"
 		saldo = ceksaldo(addr.decode())
-		resText += f" {saldo:.3f} TRX"
-		if saldo >= 0.7:
-			jumlah = round(int(saldo * 1000000 - 500))
-			# jumlah = 1000000
+		resText += f" {float(saldo):.3f} TRX"
+		if float(saldo) > 0:
+			jumlah = int(float(saldo) * 1000000)
 			resText += ' | '+'SENDING'
 			transaction = {
 				"to_address": base58.b58decode_check(sendto).hex(),
@@ -67,8 +78,9 @@ def main(file="wallet.txt"):
 				resText += ' | '+str(bytes.fromhex(result['message']).decode())
 			else:
 				resText += ' | '+str(result)
+			sendTotal += jumlah
 		print(resText)
-
+	print(f"Total : {sendTotal/1000000} TRX")
 if __name__ == '__main__':
 	sendto = input(' [ ? ] Send to Wallet > ')
 	filename = input(' [ ? ] Saved File Name > ')
